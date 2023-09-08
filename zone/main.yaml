@@ -1,0 +1,102 @@
+#* general
+gpu_id: 0
+use_gpu: True
+seed: 2021
+state: INFO
+reproducibility: True
+checkpoint_dir: 'saved'
+show_progress: True
+save_dataloaders: True
+log_root: "./log/"
+
+#* dataset
+data_path: "./dataset/"
+# Specify which columns to read from which file, in this case from ml-1m.inter read user_id, item_id, rating, timestamp, and so on
+load_col:
+    inter: [user_id, item_id, rating, timestamp, ui_count, iu_count]
+#    inter: [user_id, item_id, rating, timestamp, item_id_list_field, item_length, ui_count, iu_count] # bk
+field_separator: "\t" #Specifies the delimiter of the dataset field
+seq_separator: " " #Specifies the delimiter in the token_seq or float_seq fields of the data set
+USER_ID_FIELD: user_id
+ITEM_ID_FIELD: item_id
+RATING_FIELD: rating
+TIME_FIELD: timestamp
+
+#neg_sampling:
+#  uniform: 1
+NEG_PREFIX: neg_ #Specifies a negative sampling prefix
+LABEL_FIELD: label
+ITEM_LIST_LENGTH_FIELD: item_length #Specifies the sequence length field
+LIST_SUFFIX: _list #Assigned sequence prefix
+MAX_ITEM_LIST_LENGTH: 50 #Specifies the maximum sequence length
+POSITION_FIELD: position_id #Specifies the generated sequence location id
+
+#max_user_inter_num: 100
+min_user_inter_num: 5
+#max_item_inter_num: 100
+#min_item_inter_num: 1
+#lowest_val:
+#    timestamp: 1546264800
+#highest_val:
+#    timestamp: 1577714400
+
+#* training settings
+epochs: 500 #The maximum number of rounds trained
+train_batch_size: 1024 #batch_size of the training
+learner: adam #Uses the pytorch built-in optimizer
+learning_rate: 0.001
+training_neg_sample_num: 0 #Negative sampling number
+eval_step: 1 #The number of times evalaution is performed after each training session
+stopping_step: 10 #Control the number of steps of training convergence, in which if there is no change in the selected criteria, can be stopped early
+
+#* evalution settings
+eval_setting: TO_LS,full #The data is sorted by time, the data set is divided by one method, and the full sort is used
+metrics: ["Recall","NDCG","Hit","MRR","Precision"]
+topk: [5, 10, 20]
+valid_metric: NDCG@10
+eval_batch_size: 4096
+weight_decay: 0
+eval_args: # Different models need to use the same eval parameter, otherwise it will be unfair
+  split: { 'LS': 'valid_and_test' } # {'LS':[0.8,0.1,0.1]} # LS: Save one method, leave the last item for testing, and the second-to-last item for verification
+  group_by: user # Execute LS for each user
+  order: TO
+  mode: full
+repeatable: True
+loss_decimal_place: 4
+metric_decimal_place: 4
+
+# model
+## common
+lmd: 0.1
+lmd_sem: 0.1
+tau: 1
+# choose from {un, su, us, us_x}
+contrast: 'us_x'
+# choose from {dot, cos}
+sim: 'dot'
+hidden_dropout_prob: 0.5 # dropout probability has to be between 0 and 1
+attn_dropout_prob: 0.5 # dropout probability has to be between 0 and 1
+log_interval: 10  # Number of iterations between logs
+fast_sample_eval: 1
+
+# SimDCL
+n_layers: 2
+n_heads: 2
+hidden_size: 64 # hidden_size and inner_size are usually multiplied by 4
+inner_size: 256
+hidden_act: 'gelu'
+layer_norm_eps: 1e-12
+initializer_range: 0.02
+loss_type: 'CE' #CE,BPR
+data_aug_method: 'em:gn'
+pgd: 3 # weight for PGD turns.
+loss_func_temp: ['loss_1#1.0']
+noise_base: 0.01
+t_weight: 0.5
+g_weight: 0.5
+reg_weight: 1e-5
+lambda1: 0.01
+# gnn
+embedding_size: 64
+step: 1
+

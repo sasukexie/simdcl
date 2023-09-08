@@ -1,0 +1,20 @@
+# Saved models
+*.pth
+.vscode/
+.idea/
+*.pyc
+*.log
+saved/
+*.lprof
+*.egg-info/
+docs/build/
+wandb/*
+log/
+log_tensorboard/
+/dataset/
+.ipynb_checkpoints/
+tests/
+*.bk*.py
+common/demo
+common/test
+zone/running_param.txt
